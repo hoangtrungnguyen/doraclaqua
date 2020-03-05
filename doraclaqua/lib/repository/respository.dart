@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:connectivity/connectivity.dart';
 import 'package:doraclaqua/model/login_data.dart';
@@ -65,6 +66,30 @@ class Client {
       body: jsonEncode(<String, String>{
         "user_login": name,
       }),
+    );
+    return response;
+  }
+
+  static Future<http.Response> getRequestCount(String token) async {
+    String testToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczpcL1wvZG9yYWxhcXVhLmNvbSIsImlhdCI6MTU4MzIwNDc2OSwibmJmIjoxNTgzMjA0NzY5LCJleHAiOjE1ODM4MDk1NjksImRhdGEiOnsidXNlciI6eyJpZCI6IjExIn19fQ.0H4ZLd5etxnPySc9RoTJed21kd4SljY60PerN_rt2LA";
+    final historyUrl = "$baseUrl/wp/v2/app/history/total";
+    http.Response response = await http.get(
+      historyUrl,
+      headers: <String, String>{
+        '${HttpHeaders.authorizationHeader}':'Bearer $testToken' ,
+      },
+    );
+    return response;
+  }
+
+  static Future<http.Response> getAllRequest(String token) async {
+    String testToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczpcL1wvZG9yYWxhcXVhLmNvbSIsImlhdCI6MTU4MzIwNDc2OSwibmJmIjoxNTgzMjA0NzY5LCJleHAiOjE1ODM4MDk1NjksImRhdGEiOnsidXNlciI6eyJpZCI6IjExIn19fQ.0H4ZLd5etxnPySc9RoTJed21kd4SljY60PerN_rt2LA";
+    final historyUrl = "$baseUrl/wp/v2/app/history/request";
+    http.Response response = await http.get(
+      historyUrl,
+      headers: <String, String>{
+        '${HttpHeaders.authorizationHeader}':'Bearer $testToken' ,
+      },
     );
     return response;
   }

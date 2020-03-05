@@ -1,8 +1,12 @@
-import 'package:doraclaqua/model/user.dart';
 import 'package:doraclaqua/provider/login_model.dart';
+import 'package:doraclaqua/view/home_page.dart';
 import 'package:doraclaqua/view/login_page.dart';
+import 'package:doraclaqua/view/request_page.dart';
+import 'package:doraclaqua/view/widgets/smooth_bkg.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
+import 'model/user.dart';
 
 void main() => runApp(MyApp());
 
@@ -20,17 +24,78 @@ class MyApp extends StatelessWidget {
               return MaterialPageRoute(builder: (_) => WelcomePage());
               break;
             case '/login':
-              return MaterialPageRoute(builder: (_) => LoginPage());
+              return PageRouteBuilder(
+                  pageBuilder: (_, __, ___) => LoginPage(),
+                  transitionsBuilder:
+                      (context, animation, secondaryAnimation, child) {
+                    var begin = Offset(0.0, 1.0);
+                    var end = Offset.zero;
+                    var tween = Tween(begin: begin, end: end);
+                    var offsetAnimation = animation.drive(tween);
+
+                    return SlideTransition(
+                      position: offsetAnimation,
+                      child: child,
+                    );
+                  });
               break;
-//            case '/home':
-//              return MaterialPageRoute(builder: (_) => HomePage());
+            case '/home':
+              return PageRouteBuilder(
+                  pageBuilder: (_, animation, __) {
+                    User user = settings.arguments;
+                    return HomePage(user);
+                  },
+                  transitionDuration: Duration(milliseconds: 300),
+                  transitionsBuilder:
+                      (context, animation, secondaryAnimation, child) {
+                    var begin = Offset(0.0, 1.0);
+                    var end = Offset.zero;
+                    var tween = Tween(begin: begin, end: end);
+
+                    var curve = Curves.fastOutSlowIn;
+
+                    var curvedAnimation = CurvedAnimation(
+                      parent: animation,
+                      curve: curve,
+                    );
+
+                    return SlideTransition(
+                      position: tween.animate(curvedAnimation),
+                      child: child,
+                    );
+                  });
+            case '/request':
+              return PageRouteBuilder(
+                  pageBuilder: (_, animation, __) {
+                    User user = settings.arguments;
+                    return RequestForm(user);
+                  },
+                  transitionDuration: Duration(milliseconds: 300),
+                  transitionsBuilder:
+                      (context, animation, secondaryAnimation, child) {
+                    var begin = Offset(0.0, 1.0);
+                    var end = Offset.zero;
+                    var tween = Tween(begin: begin, end: end);
+
+                    var curve = Curves.fastOutSlowIn;
+
+                    var curvedAnimation = CurvedAnimation(
+                      parent: animation,
+                      curve: curve,
+                    );
+
+                    return SlideTransition(
+                      position: tween.animate(curvedAnimation),
+                      child: child,
+                    );
+                  });
             default:
-              return MaterialPageRoute(builder: (_) =>
-                  Scaffold(
-                    body: Center(
-                        child: Text(
-                            'No route defined for ${settings.name}')),
-                  ));
+              return MaterialPageRoute(
+                  builder: (_) => Scaffold(
+                        body: Center(
+                            child:
+                                Text('No route defined for ${settings.name}')),
+                      ));
           }
         },
         title: 'Flutter Demo',
@@ -53,22 +118,28 @@ class _WelcomePageState extends State<WelcomePage> {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       resizeToAvoidBottomPadding: false,
-      body: Column(
-        children: <Widget>[
-          Text("ASS"),
-          Container(
-            height: 100,
-          ),
-          SizedBox(
-            height: 200,
-            child: Card(
-              elevation: 0,
-              child: Image.asset('assets/images/doiraclaqua.png'),
+      body: Stack(children: <Widget>[
+        Positioned(
+            child: Align(
+                alignment: FractionalOffset.bottomCenter,
+                child: WaveBackground())),
+//        Container(color: Colors.green,),
+        Column(
+          children: <Widget>[
+            Container(
+              height: 100,
             ),
-          ),
-          _buildStartedWidget(model),
-        ],
-      ),
+            SizedBox(
+              height: 200,
+              child: Card(
+                elevation: 0,
+                child: Image.asset('assets/images/doiraclaqua.png'),
+              ),
+            ),
+            _buildStartedWidget(model),
+          ],
+        ),
+      ]),
     );
   }
 
@@ -106,10 +177,10 @@ class _WelcomePageState extends State<WelcomePage> {
                 },
                 child: Card(
                     child: Center(
-                      child: Text(
-                        "Tạo tài khoản",
-                      ),
-                    )),
+                  child: Text(
+                    "Tạo tài khoản",
+                  ),
+                )),
               ),
             ),
           )

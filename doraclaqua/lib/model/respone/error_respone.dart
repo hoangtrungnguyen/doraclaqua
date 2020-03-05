@@ -1,5 +1,5 @@
 class ErrorResponse {
-  int _code;
+  dynamic _code;
   String _message;
   Data _data;
 

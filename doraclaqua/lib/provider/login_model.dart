@@ -124,7 +124,7 @@ class LoginModel extends ChangeNotifier {
             loginResponse.userDisplayName,
             loginResponse.userEmail,
             loginResponse.token);
-        print("user after excute success $user");
+        print("user after excute success $user");//TODO check lại phần này
         message = "Tạo tài khoản mới thành công";
         return true;
       }

@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:doraclaqua/provider/login_model.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_html/flutter_html.dart';
 import 'package:provider/provider.dart';
 
 class LoginPage extends StatefulWidget {
@@ -69,7 +70,6 @@ class _LoginPageState extends State<LoginPage>
       ),
     );
   }
-
 }
 
 class SignInForm extends StatefulWidget {
@@ -158,6 +158,12 @@ class _SignInFormState extends State<SignInForm> {
                                         _showMessage(context, isSuccess,
                                             messageFailed: loginModel.message,
                                             messageSuccess: loginModel.message);
+                                        if (true) {
+//                                          Navigator.pushNamed(context, "/home",arguments: loginModel.user);
+                                          Navigator.pushNamedAndRemoveUntil(context, "/home",ModalRoute.withName('/'),
+                                              arguments: loginModel.user);
+
+                                        }
                                       }
                                     },
                                     child: Center(
@@ -468,21 +474,24 @@ class _ForgotPasswordFormState extends State<ForgotPasswordForm> {
                           child: ButtonTheme(
                             minWidth: 200,
                             height: 50,
-                            child: loginModel.isLoading ? CircularProgressIndicator() : RaisedButton(
-                                color: Colors.white,
-                                elevation: 3.0,
-                                onPressed: () async {
-                                  bool isSuccess =
-                                      await loginModel.requestNewPass();
-                                  _showMessage(context, isSuccess,
-                                      messageFailed: loginModel.message,
-                                      messageSuccess: loginModel.message);
-                                },
-                                child: Center(
-                                    child: Text(
-                                  "Lấy mật khẩu mới",
-                                  style: Theme.of(context).textTheme.headline6,
-                                ))),
+                            child: loginModel.isLoading
+                                ? CircularProgressIndicator()
+                                : RaisedButton(
+                                    color: Colors.white,
+                                    elevation: 3.0,
+                                    onPressed: () async {
+                                      bool isSuccess =
+                                          await loginModel.requestNewPass();
+                                      _showMessage(context, isSuccess,
+                                          messageFailed: loginModel.message,
+                                          messageSuccess: loginModel.message);
+                                    },
+                                    child: Center(
+                                        child: Text(
+                                      "Lấy mật khẩu mới",
+                                      style:
+                                          Theme.of(context).textTheme.headline6,
+                                    ))),
                           ),
                         ),
                         Spacer(
@@ -530,10 +539,12 @@ class _ForgotPasswordFormState extends State<ForgotPasswordForm> {
 void _showMessage(BuildContext context, bool isSuccess,
     {String messageSuccess, String messageFailed}) {
   if (isSuccess) {
-    Scaffold.of(context)
-        .showSnackBar(SnackBar(content: Text("${messageSuccess}")));
+    Scaffold.of(context).showSnackBar(SnackBar(
+      duration: Duration(seconds: 2),
+        content: Container(height: 50, child: Html(data: messageSuccess))));
   } else {
-    Scaffold.of(context)
-        .showSnackBar(SnackBar(content: Text("${messageFailed}")));
+    Scaffold.of(context).showSnackBar(SnackBar(
+        duration: Duration(seconds: 2),
+        content: Container(height: 50, child: Html(data: "${messageFailed}"))));
   }
 }

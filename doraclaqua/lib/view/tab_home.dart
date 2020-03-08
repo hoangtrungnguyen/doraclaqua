@@ -8,8 +8,6 @@ class WaitingList extends StatefulWidget {
 class _WaitingListState extends State<WaitingList> {
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(itemBuilder: (context, index){
-//      return
-    });
+    return Container();
   }
 }

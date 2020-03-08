@@ -202,7 +202,6 @@ class _SignInFormState extends State<SignInForm> {
                           icon: Icon(Icons.lock),
                           hintText: "Mật khẩu"),
                       onChanged: (value) {
-                        print("${MediaQuery.of(context).viewInsets.bottom}");
                         model.changeLoginInfo(password: value);
                       },
                       validator: (value) {

@@ -32,7 +32,6 @@ class LocationModel extends MainModel {
     isLoading = true;
     try {
       Response response = await Repository.Client.getLocations(user.token);
-      print(response.body);
       if (response.statusCode == 200) {
         LocationsResponse locResponse = LocationsResponse.fromJson(json.decode(response.body));
         locations = locResponse.locations;

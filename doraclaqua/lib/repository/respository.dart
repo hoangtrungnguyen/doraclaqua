@@ -98,7 +98,6 @@ class Client {
   static Future<http.Response> requestDoralaqua(RequestDoralaqua requestDoralaqua, String token) async {
     String testToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczpcL1wvZG9yYWxhcXVhLmNvbSIsImlhdCI6MTU4MzIwNDc2OSwibmJmIjoxNTgzMjA0NzY5LCJleHAiOjE1ODM4MDk1NjksImRhdGEiOnsidXNlciI6eyJpZCI6IjExIn19fQ.0H4ZLd5etxnPySc9RoTJed21kd4SljY60PerN_rt2LA";
     final historyUrl = "$baseUrl/wp/v2/app/request";
-    print(requestDoralaqua.toString());
     http.Response response = await http.post(
       historyUrl,
       headers: <String, String>{

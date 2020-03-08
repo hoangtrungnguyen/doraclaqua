@@ -80,7 +80,7 @@ class LoginModel extends ChangeNotifier {
     _user = value;
   }
 
-  LoginData _loginData = LoginData();
+  LoginData _loginData = LoginData(username: "tomtom",password: "12345Aa");
 
   LoginData get loginData => _loginData;
 

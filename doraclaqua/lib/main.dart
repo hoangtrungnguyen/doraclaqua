@@ -11,19 +11,20 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'model/user.dart';
 
 Future<void> main() async {
-//  SharedPreferences.getInstance().then((value) => value.get("user_token"));
   runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
+
   @override
   Widget build(BuildContext context) {
+
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (context) => LoginModel()),
       ],
       child: MaterialApp(
-//        initialRoute: ,
+//        initialRoute: token.isEmpty ? null : "/home",
         onGenerateRoute: (RouteSettings settings) {
           switch (settings.name) {
             case '/':
@@ -51,6 +52,7 @@ class MyApp extends StatelessWidget {
               return PageRouteBuilder(
                   pageBuilder: (_, animation, __) {
                     User user = settings.arguments;
+
                     return HomePage(user);
                   },
                   transitionDuration: Duration(milliseconds: 300),
@@ -112,6 +114,8 @@ class MyApp extends StatelessWidget {
       ),
     );
   }
+
+
 }
 
 class WelcomePage extends StatefulWidget {
@@ -168,6 +172,7 @@ class _WelcomePageState extends State<WelcomePage> {
                 onPressed: ()async {
                   Provider.of<LoginModel>(context, listen: false).signIn = true;
                   Navigator.pushNamed(context, '/login');
+
                 },
                 child: Center(
                   child: Text("Đăng nhập"),

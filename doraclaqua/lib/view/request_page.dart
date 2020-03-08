@@ -2,7 +2,7 @@ import 'package:datetime_picker_formfield/datetime_picker_formfield.dart';
 import 'package:doraclaqua/model/mock_value.dart';
 import 'package:doraclaqua/model/request.dart';
 import 'package:doraclaqua/model/user.dart';
-import 'package:doraclaqua/provider/main_model.dart';
+import 'package:doraclaqua/provider/request_model.dart';
 import 'package:doraclaqua/view/widgets/radio_button_group.dart';
 import 'package:doraclaqua/view/widgets/smooth_bkg.dart';
 import 'package:flutter/cupertino.dart';
@@ -254,10 +254,8 @@ class _RequestFormState extends State<RequestForm> {
                                   }
                                 },
                                 initialValue: _dueDate,
-                                format:
-//                              DateFormat.yMd('en'),
-                                    DateFormat(
-                                        "dd-MM-yyyy" /*'at' h:mma","vi" */),
+                                format: DateFormat(
+                                    "dd-MM-yyyy" /*'at' h:mma","vi" */),
                                 decoration: InputDecoration(
                                     labelText: 'Date/Time',
                                     alignLabelWithHint: true,
@@ -282,9 +280,9 @@ class _RequestFormState extends State<RequestForm> {
                                   width: double.infinity,
                                   child: Text("Khung giờ đổi rác")),
                               RadioButtonGroup(
-                                onChange:(label,index){
+                                onChange: (label, index) {
                                   request.changeRequest(fixed_time: label);
-                                } ,
+                                },
                                 isHasDifferentChoice: true,
                                 orientation:
                                     GroupedButtonsOrientation.HORIZONTAL,
@@ -296,7 +294,6 @@ class _RequestFormState extends State<RequestForm> {
                                   "8:00 AM",
                                   "5:00 PM",
                                 ],
-
                                 picked: _pickedHour,
                                 itemBuilder: (Radio rb, Text txt, int i) {
                                   return Row(
@@ -341,13 +338,16 @@ class _RequestFormState extends State<RequestForm> {
                                 },
                               ),
 
-                              request.isLoading ? CircularProgressIndicator() : RaisedButton(
-                                  onPressed: () async {
-                                    if (_requestKey.currentState.validate()) {
-                                      _request(context);
-                                    }
-                                  },
-                                  child: Text("Gửi đăng ký"))
+                              request.isLoading
+                                  ? CircularProgressIndicator()
+                                  : RaisedButton(
+                                      onPressed: () async {
+                                        if (_requestKey.currentState
+                                            .validate()) {
+                                          _request(context);
+                                        }
+                                      },
+                                      child: Text("Gửi đăng ký"))
                             ],
                           )),
                     ),
@@ -364,6 +364,7 @@ class _RequestFormState extends State<RequestForm> {
   void _request(BuildContext context) async {
     bool isSuccess = await Provider.of<RequestModel>(context, listen: false)
         .requestDoralaqua();
+    if (isSuccess) Navigator.of(context).pop();
   }
 
   bool _keyboardIsVisible(bool i) {

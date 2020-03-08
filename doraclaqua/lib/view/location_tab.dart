@@ -1,6 +1,7 @@
 import 'package:doraclaqua/model/respone/location_response.dart';
 import 'package:doraclaqua/provider/location_model.dart';
 import 'package:doraclaqua/util/pair.dart';
+import 'package:doraclaqua/view/map_page.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -29,38 +30,69 @@ class _LocationTabState extends State<LocationTab> {
       key: PageStorageKey("LocationTab"),
       child: Consumer<LocationModel>(
         builder: (BuildContext context, LocationModel value, Widget child) =>
-            Column(
-              mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-
+            Column(mainAxisSize: MainAxisSize.min, children: <Widget>[
+          value.isLoading ? LinearProgressIndicator() : Container(),
           AppBar(
+            title: Text("Địa điểm đổi rác"),
+            centerTitle: true,
             elevation: 0,
             backgroundColor: Colors.green,
             actions: [
-              FlatButton(
-                color: Colors.transparent,
-                onPressed: () {
-                  showSearch<Address>(
-                      context: context, delegate: LocationSearch(value));
-                },
-                child: Icon(
-                  Icons.filter_list,
-                ),
-              ),
+              IconButton(
+                  icon: Icon(Icons.filter),
+                  onPressed: () {
+                    showSearch<Address>(
+                        context: context,
+                        delegate: LocationSearch(value.locations));
+                  })
             ],
           ),
-//          ListView.builder(
-//              physics: BouncingScrollPhysics(),
-//              itemCount: value.addresses.length,
-//              itemBuilder: (context, index) {
-//                Address a = value.addresses[index];
-//                return Text("${a.detailAddress}");/*Card(
-//                  color: Color.fromRGBO(255, 255, 255, 0.9),
-//                    child: ListTile(
-//                      isThreeLine: true,
-//                        title: Text(a.nameAddress),
-//                        subtitle: Text(a.detailAddress)));*/
-//              })
+          SizedBox(
+            height: MediaQuery.of(context).size.height / 7 * 6 * 0.96,
+            child: ListView.builder(
+                physics: BouncingScrollPhysics(),
+                itemCount: value.addresses.length,
+                itemBuilder: (context, index) {
+                  Address a = value.addresses[index];
+                  return InkWell(
+                    onTap: (){
+                      Navigator.push(context, PageRouteBuilder(
+                          pageBuilder: (_, animation, __) {
+                            return MapLocationsDoralaqua();
+                          },
+                          transitionDuration: Duration(milliseconds: 300),
+                          transitionsBuilder:
+                              (context, animation, secondaryAnimation, child) {
+                            var begin = Offset(0.0, 1.0);
+                            var end = Offset.zero;
+                            var tween = Tween(begin: begin, end: end);
+
+                            var curve = Curves.fastOutSlowIn;
+
+                            var curvedAnimation = CurvedAnimation(
+                              parent: animation,
+                              curve: curve,
+                            );
+
+                            return SlideTransition(
+                              position: tween.animate(curvedAnimation),
+                              child: child,
+                            );
+                          }));
+                    },
+                    child: Card(
+                        color: Color.fromRGBO(255, 255, 255, 0.9),
+                        child: ListTile(
+                            isThreeLine: true,
+//                          leading: ,
+                            title: Text(a.nameAddress),
+                            subtitle: Text(
+                              a.detailAddress,
+                              maxLines: 1,
+                            ))),
+                  );
+                }),
+          )
         ]),
       ),
     );
@@ -70,8 +102,8 @@ class _LocationTabState extends State<LocationTab> {
 class LocationSearch extends SearchDelegate<Address> {
   List<Pair<Locations, bool>> _locationsChoice = [];
 
-  LocationSearch(LocationModel model) {
-    _locationsChoice = model.locations
+  LocationSearch(List<Locations> locations) {
+    _locationsChoice = locations
         .map((e) => Pair<Locations, bool>(first: e, second: true))
         .toList();
   }
@@ -90,13 +122,8 @@ class LocationSearch extends SearchDelegate<Address> {
 
   @override
   Widget buildLeading(BuildContext context) {
-    return Expanded(
-      child: FlatButton(
-        onPressed: () {
-          Navigator.pop(context);
-        },
-        child: Icon(Icons.arrow_back),
-      ),
+    return BackButton(
+      color: Colors.black,
     );
   }
 
@@ -158,7 +185,6 @@ class LocationSearch extends SearchDelegate<Address> {
 
   @override
   Widget buildSuggestions(BuildContext context) {
-    print("${_locationsChoice}");
     List<Address> suggestions = [];
     if (_locationsChoice.any((element) => element.second)) {
       _locationsChoice.where((element) => element.second).forEach((e) {

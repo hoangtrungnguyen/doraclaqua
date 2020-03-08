@@ -1,4 +1,3 @@
-import 'package:doraclaqua/model/history_request.dart';
 import 'package:doraclaqua/model/user.dart';
 import 'package:doraclaqua/provider/location_model.dart';
 import 'package:doraclaqua/provider/login_model.dart';
@@ -8,6 +7,7 @@ import 'package:doraclaqua/view/widgets/wave_animation/wave.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'history_tab.dart';
 import 'location_tab.dart';
 
 class HomePage extends StatefulWidget {
@@ -23,14 +23,11 @@ class _HomePageState extends State<HomePage>
     with SingleTickerProviderStateMixin {
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
   TabController _tabController;
-  PageController _pageController;
-
   int index = 0;
 
   @override
   void initState() {
     super.initState();
-    _pageController = PageController();
     _tabController = TabController(vsync: this, length: 3);
     _tabController.addListener(() {
       setState(() {});
@@ -47,7 +44,6 @@ class _HomePageState extends State<HomePage>
           HistoryModel model = HistoryModel(token: loginModel.user.token);
           model.user = widget.user;
           onMessageReceive(context, model); // lister to the message
-          print("${widget.user}");
           return model;
         }),
         ChangeNotifierProvider(create: (context) {
@@ -63,12 +59,14 @@ class _HomePageState extends State<HomePage>
       ],
       child: Scaffold(
           key: _scaffoldKey,
-          floatingActionButton: FloatingActionButton(
-              onPressed: () {
-                Navigator.pushNamed(context, "/request",
-                    arguments: widget.user);
-              },
-              child: Icon(Icons.add)),
+          floatingActionButton: _tabController.index != 2
+              ? FloatingActionButton(
+                  onPressed: () {
+                    Navigator.pushNamed(context, "/request",
+                        arguments: widget.user);
+                  },
+                  child: Icon(Icons.add))
+              : null,
           floatingActionButtonLocation:
               FloatingActionButtonLocation.centerFloat,
           bottomNavigationBar: TabBar(
@@ -78,17 +76,17 @@ class _HomePageState extends State<HomePage>
               Tab(
                   icon: Icon(
                 Icons.person,
-                color: Colors.black87,
+                color: _tabController.index == 0 ? Colors.green : Colors.black,
               )),
               Tab(
                   icon: Icon(
                 Icons.history,
-                color: Colors.black87,
+                color: _tabController.index == 1 ? Colors.green : Colors.black,
               )),
               Tab(
                   icon: Icon(
                 Icons.location_on,
-                color: Colors.black87,
+                color: _tabController.index == 2 ? Colors.green : Colors.black,
               )),
             ],
           ),
@@ -150,6 +148,7 @@ class _HomePageState extends State<HomePage>
   }
 }
 
+
 class ProfileTab extends StatefulWidget {
   final GlobalKey<ScaffoldState> scaffoldKey;
 
@@ -163,7 +162,9 @@ class _ProfileTabState extends State<ProfileTab> {
   @override
   void initState() {
     super.initState();
-//    onMessageReceive(context);
+    HistoryModel historyModel =
+    Provider.of<HistoryModel>(context, listen: false);
+    historyModel.getRequestsCount();
   }
 
   onMessageReceive(BuildContext context) {
@@ -196,7 +197,7 @@ class _ProfileTabState extends State<ProfileTab> {
               child: Consumer<HistoryModel>(
                   builder: (BuildContext context, history, Widget child) {
                 return Card(
-                  color: Color.fromRGBO(255, 255, 255, 0.9),
+                  color: Color.fromRGBO(255, 255, 255, 0.92),
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.all(Radius.circular(12))),
                   elevation: 5.0,
@@ -299,93 +300,4 @@ class _ProfileTabState extends State<ProfileTab> {
     );
   }
 }
-
-class HistoryTab extends StatefulWidget {
-  final GlobalKey<ScaffoldState> scaffoldKey;
-
-  HistoryTab(this.scaffoldKey);
-
-  @override
-  _HistoryTabState createState() => _HistoryTabState();
-}
-
-class _HistoryTabState extends State<HistoryTab> {
-  @override
-  void initState() {
-    super.initState();
-    Provider.of<ListRequestModel>(context, listen: false).getAllRequest();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    ListRequestModel provider =
-        Provider.of<ListRequestModel>(context, listen: false);
-    return Column(key: PageStorageKey("HistoryTab"), children: [
-      AppBar(
-        backgroundColor: Colors.green,
-        elevation: 0,
-        leading: Container(),
-        actions: <Widget>[
-          PopupMenuButton(itemBuilder: (context) {
-            return <Map>[
-              {"Tất cả": 0},
-              {"Yêu cầu": 1},
-              {"Đã đổi": 2},
-            ].map((choice) {
-              return PopupMenuItem<Map>(
-                value: choice,
-                child: FlatButton(
-                  onPressed: () {
-                    provider.changeSelected(choice.values.first);
-                  },
-                  child: Text(choice.keys.first),
-                ),
-              );
-            }).toList();
-          })
-        ],
-      ),
-      Stack(
-        children: <Widget>[
-          Container(),
-          Positioned.fill(
-            left: 15,
-            top: 70,
-            right: 15,
-            child: SafeArea(
-              child: Consumer<ListRequestModel>(
-                builder: (BuildContext context, ListRequestModel value,
-                        Widget child) =>
-                    value.selecteds.length > 0
-                        ? ListView.builder(
-                            physics: BouncingScrollPhysics(),
-                            itemCount: value.selecteds.length,
-                            itemBuilder: (context, index) {
-                              HistoryRequest request = value.selecteds[index];
-                              return Card(
-                                child: ExpansionTile(
-                                  leading: Text("${request.status}"),
-                                  title: Text("${request.content}"),
-                                  trailing: Text("${request.date}"),
-                                ),
-                              );
-                            })
-                        : Center(
-                            child: Card(
-                              child: Padding(
-                                  padding: EdgeInsets.all(16.0),
-                                  child: Text(
-                                      "Bạn chưa thực hiện đổi quà lần nào")),
-                            ),
-                          ),
-              ),
-            ),
-          )
-        ],
-      ),
-    ]);
-  }
-}
-
-
 

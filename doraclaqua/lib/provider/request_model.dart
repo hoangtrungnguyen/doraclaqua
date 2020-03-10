@@ -9,9 +9,11 @@ import 'package:doraclaqua/repository/respository.dart' as Repository;
 import 'main_model.dart';
 
 class RequestModel extends MainModel {
+
   RequestDoralaqua request;
 
   RequestModel() {
+    isLoading = false;
     request = RequestDoralaqua();
   }
 
@@ -51,15 +53,15 @@ class RequestModel extends MainModel {
   Future<bool> requestDoralaqua() async {
     isLoading = true;
     try {
+      String token = await getToken();
       Response response =
-      await Repository.Client.requestDoralaqua(request, /*user.token ??*/ "NaN");
+      await Repository.Client.requestDoralaqua(request, token);
       if (response.statusCode == 200) {
         RequestDoralaquaRespone requestResponse =
         RequestDoralaquaRespone.fromJson(json.decode(response.body));
         messageSubject.add(requestResponse.message);
         return true;
       }
-      print(response.body);
       ErrorResponse errorResponse =
       ErrorResponse.fromJson(json.decode(response.body));
       messageSubject.add(errorResponse.message);

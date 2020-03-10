@@ -2,6 +2,7 @@ import 'package:doraclaqua/model/history_request.dart';
 import 'package:doraclaqua/provider/main_model.dart';
 import 'package:doraclaqua/util/pair.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
 
 
@@ -20,8 +21,13 @@ class _HistoryTabState extends State<HistoryTab> {
   @override
   void initState() {
     super.initState();
-//    Provider.of<ListRequestModel>(context, listen: false).getAllRequest();
+    Provider.of<ListRequestModel>(context, listen: false).getAllRequest();
   }
+  final popUpItems = [
+  Pair<String, int>(first: "Tất cả", second: 0),
+  Pair<String, int>(first: "Yêu cầu", second: 1),
+  Pair<String, int>(first: "Đã đổi", second: 2),
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +35,6 @@ class _HistoryTabState extends State<HistoryTab> {
         Provider.of<ListRequestModel>(context, listen: false);
     return Consumer<ListRequestModel>(
         builder: (BuildContext context, ListRequestModel value, Widget child) {
-      print("${value.selecteds.length}");
       return Stack(
         children: <Widget>[
           value.isLoading ? LinearProgressIndicator() : Container(),
@@ -41,20 +46,15 @@ class _HistoryTabState extends State<HistoryTab> {
               centerTitle: true,
               leading: Container(),
               actions: <Widget>[
-                PopupMenuButton(itemBuilder: (context) {
-                  return [
-                    Pair<String, int>(first: "Tất cả", second: 0),
-                    Pair<String, int>(first: "Yêu cầu", second: 1),
-                    Pair<String, int>(first: "Đã đổi", second: 2),
-                  ].map((choice) {
+                PopupMenuButton<Pair>(
+                  onSelected:  (it) {
+                    value.changeSelected(it.second);
+                  },
+                    itemBuilder: (context) {
+                  return popUpItems.map((choice) {
                     return PopupMenuItem<Pair>(
                       value: choice,
-                      child: Flexible(
-                          child: InkWell(
-                              onTap: () {
-                                value.changeSelected(choice.second);
-                              },
-                              child: Text(choice.first))),
+                      child: Text(choice.first),
                     );
                   }).toList();
                 })
@@ -82,11 +82,13 @@ class _HistoryTabState extends State<HistoryTab> {
                   )
                 : value.isLoading
                     ? Container()
-                    : Card(
-                        child: Padding(
-                            padding: EdgeInsets.all(16.0),
-                            child: Text("Bạn chưa thực hiện đổi quà lần nào")),
-                      ),)
+                    : Center(
+                      child: Card(
+                          child: Padding(
+                              padding: EdgeInsets.all(16.0),
+                              child: Text("Bạn chưa thực hiện đổi quà lần nào")),
+                        ),
+                    ),)
           ]),
         ],
       );

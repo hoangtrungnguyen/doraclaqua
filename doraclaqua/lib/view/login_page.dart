@@ -1,11 +1,12 @@
+import 'dart:math';
+
 import 'package:doraclaqua/provider/login_model.dart';
+import 'package:doraclaqua/util/share_pref.dart';
 import 'package:doraclaqua/view/widgets/wave_animation/config.dart';
 import 'package:doraclaqua/view/widgets/wave_animation/wave.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class InheritedLogin extends InheritedWidget {
   InheritedLogin({Widget child}) : super(child: child);
@@ -32,7 +33,9 @@ class InheritedLogin extends InheritedWidget {
 }
 
 class LoginPage extends StatefulWidget {
-  LoginPage({Key key, this.title}) : super(key: key);
+  int initialPage = 2;
+
+  LoginPage({Key key, this.title, this.initialPage}) : super(key: key) {}
 
   final String title;
 
@@ -42,8 +45,8 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage>
     with TickerProviderStateMixin, WidgetsBindingObserver {
-  AnimationController _animController;
-  Animation<Offset> offset;
+//  AnimationController _animController;
+//  Animation<Offset> offset;
 
   double bannerHeight = 250;
 
@@ -51,11 +54,15 @@ class _LoginPageState extends State<LoginPage>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _animController =
-        AnimationController(vsync: this, duration: Duration(milliseconds: 500))
-          ..forward();
-    offset = Tween<Offset>(begin: Offset.zero, end: Offset(0.0, 1.0))
-        .animate(_animController);
+    if (widget.initialPage == 0)
+      Provider.of<LoginModel>(context, listen: false).signIn = true;
+    else
+      Provider.of<LoginModel>(context, listen: false).signUp = true;
+//    _animController =
+//        AnimationController(vsync: this, duration: Duration(milliseconds: 500))
+//          ..forward();
+//    offset = Tween<Offset>(begin: Offset.zero, end: Offset(0.0, 1.0))
+//        .animate(_animController);
   }
 
   @override
@@ -66,7 +73,6 @@ class _LoginPageState extends State<LoginPage>
 
   @override
   Widget build(BuildContext context) {
-    LoginModel model = Provider.of<LoginModel>(context, listen: false);
     return Scaffold(
       resizeToAvoidBottomInset: false,
       resizeToAvoidBottomPadding: false,
@@ -102,9 +108,6 @@ class _LoginPageState extends State<LoginPage>
                 child: SizedBox(
                   height: MediaQuery.of(context).size.height / 5 * 3.2,
                   child: Consumer<LoginModel>(builder: (context, model, child) {
-                    final animation =
-                        Tween<Offset>(begin: Offset(0, 0), end: Offset(1, 1))
-                            .animate(_animController);
                     if (model.signUp) {
                       return _SignUpForm();
                     } else if (model.signIn) {
@@ -234,13 +237,15 @@ class _SignInFormState extends State<SignInForm> {
                                           messageSuccess: loginModel.message);
                                       if (isSuccess) {
 //                                          Navigator.pushNamed(context, "/home",arguments: loginModel.user);
-                                        if (loginModel?.user?.token != null)
-                                          _savePref(loginModel.user.token);
-                                        Navigator.pushNamedAndRemoveUntil(
-                                            context,
-                                            "/home",
-                                            ModalRoute.withName('/'),
-                                            arguments: loginModel.user);
+                                        if (loginModel?.user?.token != null) {
+                                          SharePre.savePref(
+                                              loginModel.user.token);
+                                          Navigator.pushNamedAndRemoveUntil(
+                                              context,
+                                              "/home",
+                                              ModalRoute.withName('/'),
+                                              arguments: loginModel.user);
+                                        }
                                       }
                                     }
                                   },
@@ -287,11 +292,6 @@ class _SignInFormState extends State<SignInForm> {
         ),
       ),
     );
-  }
-
-  _savePref(String token) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setString('user_token', token);
   }
 }
 

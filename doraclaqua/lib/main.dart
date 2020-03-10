@@ -2,11 +2,11 @@ import 'package:doraclaqua/provider/login_model.dart';
 import 'package:doraclaqua/view/home_page.dart';
 import 'package:doraclaqua/view/login_page.dart';
 import 'package:doraclaqua/view/request_page.dart';
+import 'package:doraclaqua/view/widgets/theme.dart';
 import 'package:doraclaqua/view/widgets/wave_animation/config.dart';
 import 'package:doraclaqua/view/widgets/wave_animation/wave.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import 'model/user.dart';
 
@@ -33,7 +33,7 @@ class MyApp extends StatelessWidget {
             case '/login':
               return PageRouteBuilder(
                   pageBuilder: (_, __, ___) => InheritedLogin(
-                        child: LoginPage(),
+                        child: LoginPage(initialPage: settings.arguments,),
                       ),
                   transitionDuration: Duration(milliseconds: 400),
                   transitionsBuilder:
@@ -75,10 +75,10 @@ class MyApp extends StatelessWidget {
                     );
                   });
             case '/request':
-              return PageRouteBuilder(
+              return PageRouteBuilder<bool>(
                   pageBuilder: (_, animation, __) {
-                    User user = settings.arguments;
-                    return RequestForm(user);
+
+                    return RequestForm();
                   },
                   transitionDuration: Duration(milliseconds: 300),
                   transitionsBuilder:
@@ -109,7 +109,7 @@ class MyApp extends StatelessWidget {
           }
         },
         title: 'Flutter Demo',
-        theme: ThemeData(),
+        theme: lightTheme(context),
 //        home: WelcomePage(),
       ),
     );
@@ -167,11 +167,12 @@ class _WelcomePageState extends State<WelcomePage> {
               height: 50,
               width: 300,
               child: RaisedButton(
-                color:Colors.white,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(10))),
+                color: Colors.green[50],
                 elevation: 4.0,
                 onPressed: ()async {
-                  Provider.of<LoginModel>(context, listen: false).signIn = true;
-                  Navigator.pushNamed(context, '/login');
+                  Navigator.pushNamed(context, '/login',arguments: 0);
 
                 },
                 child: Center(
@@ -182,16 +183,17 @@ class _WelcomePageState extends State<WelcomePage> {
           ),
           Padding(
             padding: EdgeInsets.only(top: 15),
+
             child: SizedBox(
               height: 50,
               width: 300,
               child: RaisedButton(
-                  color: Colors.white,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(10))),
+                  color: Colors.green[50],
                   elevation: 4.0,
                   onPressed: () async {
-                    Navigator.pushNamed(context, '/login');
-                    Provider.of<LoginModel>(context, listen: false).signUp =
-                        true;
+                    Navigator.pushNamed(context, '/login',arguments: 1);
                   },
                   child: Center(
                     child: Text(

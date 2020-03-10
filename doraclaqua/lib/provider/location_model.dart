@@ -31,11 +31,17 @@ class LocationModel extends MainModel {
   Future<bool> getLocations() async {
     isLoading = true;
     try {
-      Response response = await Repository.Client.getLocations(user.token);
+      String token = await getToken();
+      if(token.isEmpty) return false;
+
+      Response response = await Repository.Client.getLocations(token);
       if (response.statusCode == 200) {
         LocationsResponse locResponse = LocationsResponse.fromJson(json.decode(response.body));
+//        print(locResponse.locations.length);
+        locations.clear();
         locations = locResponse.locations;
-        for(Locations list in locations){
+        addresses.clear();
+        for(Locations list in locResponse.locations){
           addresses.addAll(list.address);
         }
         return true;

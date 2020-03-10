@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:doraclaqua/main.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   testWidgets('Counter increments smoke test', (WidgetTester tester) async {
@@ -26,5 +27,16 @@ void main() {
     // Verify that our counter has incremented.
     expect(find.text('0'), findsNothing);
     expect(find.text('1'), findsOneWidget);
+  });
+
+
+  test('Can Create Preferences', () async{
+
+    SharedPreferences.setMockInitialValues({}); //set values here
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    pref.setString('user_token', "token");
+
+
+    expect(pref.getString('user_token'), 'token');
   });
 }

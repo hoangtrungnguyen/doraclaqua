@@ -2,6 +2,7 @@ import 'package:doraclaqua/model/user.dart';
 import 'package:doraclaqua/provider/location_model.dart';
 import 'package:doraclaqua/provider/login_model.dart';
 import 'package:doraclaqua/provider/main_model.dart';
+import 'package:doraclaqua/util/share_pref.dart';
 import 'package:doraclaqua/view/widgets/wave_animation/config.dart';
 import 'package:doraclaqua/view/widgets/wave_animation/wave.dart';
 import 'package:flutter/material.dart';
@@ -61,9 +62,10 @@ class _HomePageState extends State<HomePage>
           key: _scaffoldKey,
           floatingActionButton: _tabController.index != 2
               ? FloatingActionButton(
-                  onPressed: () {
-                    Navigator.pushNamed(context, "/request",
-                        arguments: widget.user);
+                  onPressed: () async {
+                    bool isSuccess =await Navigator.pushNamed<bool>(context, "/request",);
+                    if(isSuccess)
+                      Provider.of<HistoryModel>(context,listen: false).getRequestsCount();
                   },
                   child: Icon(Icons.add))
               : null,
@@ -101,7 +103,10 @@ class _HomePageState extends State<HomePage>
                   children: [
                     ProfileTab(_scaffoldKey),
                     HistoryTab(_scaffoldKey),
-                    LocationTab(_scaffoldKey),
+                    InheritedLocationWidget(
+                      _scaffoldKey,
+                      child: LocationTab(),
+                    ),
                   ]),
             ]),
           )),
@@ -148,7 +153,6 @@ class _HomePageState extends State<HomePage>
   }
 }
 
-
 class ProfileTab extends StatefulWidget {
   final GlobalKey<ScaffoldState> scaffoldKey;
 
@@ -163,7 +167,7 @@ class _ProfileTabState extends State<ProfileTab> {
   void initState() {
     super.initState();
     HistoryModel historyModel =
-    Provider.of<HistoryModel>(context, listen: false);
+        Provider.of<HistoryModel>(context, listen: false);
     historyModel.getRequestsCount();
   }
 
@@ -188,6 +192,7 @@ class _ProfileTabState extends State<ProfileTab> {
             return Container();
           }
         }),
+
         SafeArea(
           child: Align(
             alignment: AlignmentDirectional(0, -0.4),
@@ -291,6 +296,7 @@ class _ProfileTabState extends State<ProfileTab> {
                 child: Consumer<LoginModel>(
                   builder: (BuildContext context, value, Widget child) =>
                       CircleAvatar(
+
                     radius: 50,
                   ),
                 ),
@@ -299,5 +305,17 @@ class _ProfileTabState extends State<ProfileTab> {
       ],
     );
   }
-}
 
+//  void _importImage() async {
+//    await _checkPermissions();
+//    final image = await ImagePicker.pickImage(source: ImageSource.camera);
+//    setState(() {
+//      _imageFile = image;
+//    });
+//    _labelImage();
+//  }
+
+  void _signOut() async {
+    SharePre.deleteToken();
+  }
+}

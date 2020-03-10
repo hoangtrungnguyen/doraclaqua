@@ -1,99 +1,174 @@
 import 'package:doraclaqua/model/respone/location_response.dart';
 import 'package:doraclaqua/provider/location_model.dart';
+import 'package:doraclaqua/util/open_map.dart';
 import 'package:doraclaqua/util/pair.dart';
-import 'package:doraclaqua/view/map_page.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
-class LocationTab extends StatefulWidget {
+class InheritedLocationWidget extends InheritedWidget {
   final GlobalKey<ScaffoldState> scaffoldKey;
 
-  LocationTab(this.scaffoldKey);
+  InheritedLocationWidget(this.scaffoldKey, {Widget child})
+      : super(child: child);
 
+  @override
+  bool updateShouldNotify(InheritedWidget oldWidget) {
+    return true;
+  }
+
+  static InheritedLocationWidget of(BuildContext context) {
+    return context
+        .dependOnInheritedWidgetOfExactType<InheritedLocationWidget>();
+  }
+
+  call(String phoneNumber) async {
+    try {
+      String URI = "tel://$phoneNumber";
+      await launch(URI);
+    } on Exception catch (e) {
+      scaffoldKey.currentState
+          .showSnackBar(SnackBar(content: Text(e.toString())));
+    }
+  }
+}
+
+class LocationTab extends StatefulWidget {
   @override
   _LocationTabState createState() => _LocationTabState();
 }
 
 class _LocationTabState extends State<LocationTab> {
-//  LocationModel locModel;
+  final GlobalKey<_LocationTabState> _locationPageKey = GlobalKey();
 
   @override
   void initState() {
     super.initState();
-//    locModel = Provider.of<LocationModel>(context);
-//    locModel.getLocations();
+    Provider.of<LocationModel>(context, listen: false).getLocations();
   }
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      key: PageStorageKey("LocationTab"),
-      child: Consumer<LocationModel>(
-        builder: (BuildContext context, LocationModel value, Widget child) =>
-            Column(mainAxisSize: MainAxisSize.min, children: <Widget>[
-          value.isLoading ? LinearProgressIndicator() : Container(),
-          AppBar(
-            title: Text("Địa điểm đổi rác"),
-            centerTitle: true,
-            elevation: 0,
-            backgroundColor: Colors.green,
-            actions: [
-              IconButton(
-                  icon: Icon(Icons.filter),
-                  onPressed: () {
-                    showSearch<Address>(
-                        context: context,
-                        delegate: LocationSearch(value.locations));
-                  })
-            ],
-          ),
-          SizedBox(
-            height: MediaQuery.of(context).size.height / 7 * 6 * 0.96,
-            child: ListView.builder(
-                physics: BouncingScrollPhysics(),
-                itemCount: value.addresses.length,
-                itemBuilder: (context, index) {
-                  Address a = value.addresses[index];
-                  return InkWell(
-                    onTap: (){
-                      Navigator.push(context, PageRouteBuilder(
-                          pageBuilder: (_, animation, __) {
-                            return MapLocationsDoralaqua();
-                          },
-                          transitionDuration: Duration(milliseconds: 300),
-                          transitionsBuilder:
-                              (context, animation, secondaryAnimation, child) {
-                            var begin = Offset(0.0, 1.0);
-                            var end = Offset.zero;
-                            var tween = Tween(begin: begin, end: end);
+    return Consumer<LocationModel>(
+        key: _locationPageKey,
+        builder: (BuildContext context, LocationModel value, Widget child) {
+          return Stack(children: <Widget>[
+            value.isLoading ? LinearProgressIndicator() : Container(),
+            Column(
+              children: <Widget>[
+                AppBar(
+                  title: Text("Địa điểm đổi rác"),
+                  centerTitle: true,
+                  elevation: 0,
+                  backgroundColor: Colors.green,
+                  actions: [
+                    IconButton(
+                        icon: Icon(Icons.filter_list),
+                        onPressed: () {
+                          showSearch<Address>(
+                              context: context,
+                              delegate: LocationSearch(value.locations));
+                        })
+                  ],
+                ),
+                SizedBox(
+                    height: MediaQuery.of(context).size.height / 7 * 6 * 0.96,
+                    child: ListView.builder(
+                      physics: BouncingScrollPhysics(),
+                      itemCount: value.addresses.length,
+                      itemBuilder: (context, index) {
+                        Address a = value.addresses[index];
+//                        return TweenAnimationBuilder(
+//                          duration: Duration(milliseconds: 400),
+//                          tween: null,
+//                          builder: (BuildContext context, value, Widget child) {
+//                            return ItemSlide(a);
+//                          },
+//                        );
+                        return ItemSlide(a);
+                      },
+                    ))
+              ],
+            ),
+          ]);
+        });
+  }
+}
 
-                            var curve = Curves.fastOutSlowIn;
+class ItemSlide extends StatefulWidget {
+  final Address address;
 
-                            var curvedAnimation = CurvedAnimation(
-                              parent: animation,
-                              curve: curve,
-                            );
+  ItemSlide(this.address);
 
-                            return SlideTransition(
-                              position: tween.animate(curvedAnimation),
-                              child: child,
-                            );
-                          }));
-                    },
-                    child: Card(
-                        color: Color.fromRGBO(255, 255, 255, 0.9),
-                        child: ListTile(
-                            isThreeLine: true,
-//                          leading: ,
-                            title: Text(a.nameAddress),
-                            subtitle: Text(
-                              a.detailAddress,
-                              maxLines: 1,
-                            ))),
-                  );
-                }),
-          )
-        ]),
+  @override
+  _ItemSlideState createState() => _ItemSlideState();
+}
+
+class _ItemSlideState extends State<ItemSlide> {
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedOpacity(
+      duration: Duration(milliseconds: 400),
+      opacity: 1.0,
+      child: InkWell(
+        onTap: () {
+          MapsLauncher.launchQuery(
+              "${widget.address.detailAddress} ${widget.address.area}");
+        },
+        child: Card(
+            color: Color.fromRGBO(255, 255, 255, 0.9),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                ListTile(
+                  contentPadding: EdgeInsets.symmetric(horizontal: 16.0),
+                  title: Padding(
+                      padding: EdgeInsets.only(top: 8.0, bottom: 4.0),
+                      child: Text(
+                        widget.address.nameAddress,
+                        style: Theme.of(context).textTheme.headline6,
+                      )),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Padding(
+                        padding: EdgeInsets.zero,
+                        child: Text(
+                          widget.address.detailAddress,
+                          maxLines: 1,
+                          textAlign: TextAlign.start,
+                        ),
+                      ),
+                      Text("${widget.address.time}\n${widget.address.noteTime}")
+                    ],
+                  ),
+                ),
+                ButtonBar(
+                  children: <Widget>[
+//                  RaisedButton(
+//                    shape: RoundedRectangleBorder(
+//                        borderRadius: BorderRadius.all(Radius.circular(10))),
+//                    color: Colors.green[200],
+//                    child: const Text('Đổi quà'),
+//                    onPressed: () async {
+//
+//                    },
+//                  ),
+                    RaisedButton(
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(10))),
+                      color: Colors.green[200],
+                      child: const Text('Gọi'),
+                      onPressed: () async {
+                        InheritedLocationWidget.of(context)
+                            .call(widget.address.phone);
+                      },
+                    )
+                  ],
+                )
+              ],
+            )),
       ),
     );
   }
@@ -168,6 +243,7 @@ class LocationSearch extends SearchDelegate<Address> {
                   child: InkWell(
                     onTap: () async {
                       close(context, e);
+                      MapsLauncher.launchQuery("${e.detailAddress} ${e.area}");
                     },
                     child: ListTile(
                       leading: Icon(Icons.book),

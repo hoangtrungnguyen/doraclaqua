@@ -1,7 +1,6 @@
 import 'package:datetime_picker_formfield/datetime_picker_formfield.dart';
 import 'package:doraclaqua/model/mock_value.dart';
 import 'package:doraclaqua/model/request.dart';
-import 'package:doraclaqua/model/user.dart';
 import 'package:doraclaqua/provider/request_model.dart';
 import 'package:doraclaqua/view/widgets/radio_button_group.dart';
 import 'package:doraclaqua/view/widgets/smooth_bkg.dart';
@@ -12,9 +11,8 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 class RequestForm extends StatefulWidget {
-  final User user;
 
-  RequestForm(this.user);
+  RequestForm();
 
   @override
   _RequestFormState createState() => _RequestFormState();
@@ -48,7 +46,6 @@ class _RequestFormState extends State<RequestForm> {
     return ChangeNotifierProvider<RequestModel>(
       create: (BuildContext context) {
         RequestModel model = RequestModel();
-        model.user = widget.user;
         onMessageReceive(context, model);
         return model;
       },
@@ -362,9 +359,8 @@ class _RequestFormState extends State<RequestForm> {
   }
 
   void _request(BuildContext context) async {
-    bool isSuccess = await Provider.of<RequestModel>(context, listen: false)
-        .requestDoralaqua();
-    if (isSuccess) Navigator.of(context).pop();
+    bool isSuccess = await Provider.of<RequestModel>(context, listen: false).requestDoralaqua();
+    if (isSuccess) Navigator.of(context).pop(true);
   }
 
   bool _keyboardIsVisible(bool i) {

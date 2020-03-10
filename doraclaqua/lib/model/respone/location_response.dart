@@ -1,12 +1,13 @@
 class LocationsResponse {
-  List<Locations> locations= [];
+  List<Locations> locations = [];
 
   LocationsResponse({this.locations});
 
   LocationsResponse.fromJson(List<dynamic> json) {
-    json.forEach((element) { locations.add(Locations.fromJson(element));});
+    json.forEach((element) {
+      locations.add(Locations.fromJson(element));
+    });
   }
-
 }
 
 class Locations {
@@ -43,14 +44,24 @@ class Address {
   String detailAddress;
   String area;
   String phone;
+  String time;
+  String noteTime;
 
-  Address({this.nameAddress, this.detailAddress, this.area, this.phone});
+  Address(
+      {this.nameAddress,
+      this.detailAddress,
+      this.area,
+      this.phone,
+      this.time,
+      this.noteTime});
 
   Address.fromJson(Map<String, dynamic> json) {
     nameAddress = json['name_address'];
     detailAddress = json['detail_address'];
     area = json['area'];
     phone = json['phone'];
+    time = json['time'];
+    noteTime = json['note_time'];
   }
 
   Map<String, dynamic> toJson() {
@@ -59,12 +70,8 @@ class Address {
     data['detail_address'] = this.detailAddress;
     data['area'] = this.area;
     data['phone'] = this.phone;
+    data['time'] = this.time;
+    data['note_time'] = this.noteTime;
     return data;
   }
-
-  @override
-  String toString() {
-    return 'Address{nameAddress: $nameAddress, detailAddress: $detailAddress, area: $area, phone: $phone}';
-  }
-
 }

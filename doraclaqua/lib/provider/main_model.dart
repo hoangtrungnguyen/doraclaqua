@@ -6,6 +6,7 @@ import 'package:doraclaqua/model/respone/history_response.dart';
 import 'package:doraclaqua/model/respone/item_history_response.dart';
 import 'package:doraclaqua/model/user.dart';
 import 'package:doraclaqua/repository/respository.dart' as Repository;
+import 'package:doraclaqua/util/share_pref.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart';
 import 'package:rxdart/rxdart.dart';
@@ -30,6 +31,16 @@ abstract class MainModel extends ChangeNotifier {
   set isLoading(bool value) {
     _isLoading = value;
     notifyListeners();
+  }
+
+  Future<String> getToken() async {
+    String token = await SharePre.getStringValue(key: userToken);
+    if (token.isEmpty) {
+      messageSubject.add("Token is empty");
+      return null;
+    }
+
+    return token;
   }
 }
 
@@ -68,7 +79,9 @@ class HistoryModel extends MainModel {
   getRequestsCount() async {
     isLoading = true;
     try {
-      Response response = await Repository.Client.getRequestCount(user.token);
+      String token = await getToken();
+      if(token.isEmpty) return;
+      Response response = await Repository.Client.getRequestCount(token);
       if (response.statusCode == 200) {
         CountItemHistoryResponse historyResponse =
             CountItemHistoryResponse.fromJson(json.decode(response.body));
@@ -88,7 +101,6 @@ class HistoryModel extends MainModel {
 }
 
 class ListRequestModel extends MainModel {
-
   ListRequestModel() {
     getAllRequest();
   }
@@ -122,7 +134,6 @@ class ListRequestModel extends MainModel {
         ;
         break;
       default:
-
     }
 
     notifyListeners();
@@ -131,7 +142,9 @@ class ListRequestModel extends MainModel {
   getAllRequest() async {
     isLoading = true;
     try {
-      Response response = await Repository.Client.getAllRequest(user.token);
+      String token = await getToken();
+      if(token.isEmpty) return;
+      Response response = await Repository.Client.getAllRequest(token);
       if (response.statusCode == 200) {
         ListRequestResponse historyResponse =
             ListRequestResponse.fromJson(json.decode(response.body));

@@ -10,7 +10,12 @@ import 'package:http/http.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class LoginModel extends ChangeNotifier {
-  LoginModel();
+  LoginModel(int initialPage){
+    if (initialPage == 0)
+      _signIn = true;
+    else
+      signUp = true;
+  }
 
   bool _signIn = false;
 

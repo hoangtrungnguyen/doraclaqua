@@ -54,15 +54,6 @@ class _LoginPageState extends State<LoginPage>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    if (widget.initialPage == 0)
-      Provider.of<LoginModel>(context, listen: false).signIn = true;
-    else
-      Provider.of<LoginModel>(context, listen: false).signUp = true;
-//    _animController =
-//        AnimationController(vsync: this, duration: Duration(milliseconds: 500))
-//          ..forward();
-//    offset = Tween<Offset>(begin: Offset.zero, end: Offset(0.0, 1.0))
-//        .animate(_animController);
   }
 
   @override
@@ -73,27 +64,29 @@ class _LoginPageState extends State<LoginPage>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
-      resizeToAvoidBottomPadding: false,
-      body: SafeArea(
-        child: Stack(children: [
-          _buildWaveAnimation(),
-          Column(
-            children: <Widget>[
-              AnimatedContainer(
-                duration: Duration(milliseconds: 100),
-                height: InheritedLogin.of(context)
-                        .keyboardIsVisible(context) /*&& model.signUp*/ ? 0
-                    : 250,
-                child: SizedBox(
-                  height: bannerHeight,
-                  child: Card(
-                    elevation: 0,
-                    child: Image.asset('assets/images/doiraclaqua.png'),
+    return ChangeNotifierProvider<LoginModel>(
+      create: (BuildContext context) {  return LoginModel(widget.initialPage); },
+      child: Scaffold(
+        resizeToAvoidBottomInset: false,
+        resizeToAvoidBottomPadding: false,
+        body: SafeArea(
+          child: Stack(children: [
+            _buildWaveAnimation(),
+            Column(
+              children: <Widget>[
+                AnimatedContainer(
+                  duration: Duration(milliseconds: 100),
+                  height: InheritedLogin.of(context)
+                          .keyboardIsVisible(context) /*&& model.signUp*/ ? 0
+                      : 250,
+                  child: SizedBox(
+                    height: bannerHeight,
+                    child: Card(
+                      elevation: 0,
+                      child: Image.asset('assets/images/doiraclaqua.png'),
+                    ),
                   ),
                 ),
-              ),
 //            !InheritedLogin.of(context).keyboardIsVisible(context)
 //                ? SizedBox(
 //                    height: bannerHeight,
@@ -103,24 +96,25 @@ class _LoginPageState extends State<LoginPage>
 //                    ),
 //                  )
 //                : Container(),
-              AnimatedContainer(
-                duration: Duration(milliseconds: 100),
-                child: SizedBox(
-                  height: MediaQuery.of(context).size.height / 5 * 3.2,
-                  child: Consumer<LoginModel>(builder: (context, model, child) {
-                    if (model.signUp) {
-                      return _SignUpForm();
-                    } else if (model.signIn) {
-                      return SignInForm();
-                    } else {
-                      return ForgotPasswordForm();
-                    }
-                  }),
-                ),
-              )
-            ],
-          ),
-        ]),
+                AnimatedContainer(
+                  duration: Duration(milliseconds: 100),
+                  child: SizedBox(
+                    height: MediaQuery.of(context).size.height / 5 * 3.2,
+                    child: Consumer<LoginModel>(builder: (context, model, child) {
+                      if (model.signUp) {
+                        return _SignUpForm();
+                      } else if (model.signIn) {
+                        return SignInForm();
+                      } else {
+                        return ForgotPasswordForm();
+                      }
+                    }),
+                  ),
+                )
+              ],
+            ),
+          ]),
+        ),
       ),
     );
   }
@@ -157,9 +151,8 @@ class _SignInFormState extends State<SignInForm> {
 
   @override
   Widget build(BuildContext context) {
-    LoginModel model = Provider.of<LoginModel>(context);
     return Consumer<LoginModel>(
-      builder: (BuildContext context, loginModel, Widget child) => Padding(
+      builder: (BuildContext context, model, Widget child) => Padding(
         padding: EdgeInsets.only(left: 16.0, right: 16.0),
         child: Card(
           color: Color.fromRGBO(255, 255, 255, 0.95),
@@ -187,7 +180,7 @@ class _SignInFormState extends State<SignInForm> {
                       onChanged: (value) {
                         model.changeLoginInfo(name: value);
                       },
-                      initialValue: loginModel.loginData.username,
+                      initialValue: model.loginData.username,
                       validator: (value) {
                         if (value.isEmpty) {
                           return "Bạn phải điền tên đăng nhập";
@@ -197,7 +190,7 @@ class _SignInFormState extends State<SignInForm> {
                     ),
                     Spacer(),
                     TextFormField(
-                      initialValue: loginModel.loginData.password,
+                      initialValue: model.loginData.password,
                       obscureText: true,
                       decoration: InputDecoration(
                           border: OutlineInputBorder(gapPadding: 10.0),
@@ -217,7 +210,7 @@ class _SignInFormState extends State<SignInForm> {
                     Spacer(flex: 3),
                     Padding(
                       padding: EdgeInsets.symmetric(vertical: 16.0),
-                      child: loginModel.isLoading
+                      child: model.isLoading
                           ? CircularProgressIndicator()
                           : ButtonTheme(
                               minWidth: 200,
@@ -226,25 +219,19 @@ class _SignInFormState extends State<SignInForm> {
                                   color: Colors.white,
                                   elevation: 3.0,
                                   onPressed: () async {
-                                    InheritedLogin.of(context)
-                                        .dismissKeyBoard(context);
-                                    if (_signInFormKey.currentState
-                                        .validate()) {
-                                      bool isSuccess =
-                                          await loginModel.excuteLoggedIn();
-                                      _showMessage(context, isSuccess,
-                                          messageFailed: loginModel.message,
-                                          messageSuccess: loginModel.message);
+                                    InheritedLogin.of(context).dismissKeyBoard(context);
+                                    if (_signInFormKey.currentState.validate()) {
+                                      bool isSuccess = await model.excuteLoggedIn();
+                                      _showMessage(context, isSuccess, messageFailed: model.message, messageSuccess: model.message);
                                       if (isSuccess) {
 //                                          Navigator.pushNamed(context, "/home",arguments: loginModel.user);
-                                        if (loginModel?.user?.token != null) {
-                                          SharePre.savePref(
-                                              loginModel.user.token);
+                                        if (model?.user?.token != null) {
+                                          SharePre.savePref(model.user.token);
                                           Navigator.pushNamedAndRemoveUntil(
                                               context,
                                               "/home",
                                               ModalRoute.withName('/'),
-                                              arguments: loginModel.user);
+                                              arguments: model.user);
                                         }
                                       }
                                     }
@@ -265,7 +252,7 @@ class _SignInFormState extends State<SignInForm> {
                       children: <Widget>[
                         InkWell(
                           onTap: () {
-                            loginModel.signUp = true;
+                            model.signUp = true;
                           },
                           child: SizedBox(
                             height: 50,
@@ -278,7 +265,7 @@ class _SignInFormState extends State<SignInForm> {
                         ),
                         InkWell(
                           onTap: () {
-                            loginModel.forgotPass = true;
+                            model.forgotPass = true;
                           },
                           child: SizedBox(
                               height: 50,

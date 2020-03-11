@@ -7,7 +7,8 @@ import 'package:doraclaqua/repository/respository.dart' as Repository;
 import 'package:http/http.dart';
 
 class LocationModel extends MainModel {
-  List<Locations> _locations= [];
+  List<Locations> _locations = [];
+
   List<Locations> get locations => _locations;
 
   set locations(List<Locations> value) {
@@ -24,25 +25,27 @@ class LocationModel extends MainModel {
     notifyListeners();
   }
 
-  LocationModel(){
-   getLocations();
+  LocationModel() {
+    getLocations();
   }
 
   Future<bool> getLocations() async {
     isLoading = true;
     try {
       String token = await getToken();
-      if(token.isEmpty) return false;
+      if (token.isEmpty) return false;
 
       Response response = await Repository.Client.getLocations(token);
       if (response.statusCode == 200) {
-        LocationsResponse locResponse = LocationsResponse.fromJson(json.decode(response.body));
-//        print(locResponse.locations.length);
+        LocationsResponse locResponse =
+            LocationsResponse.fromJson(json.decode(response.body));
+//        if(locResponse.locations == locations)
+//          return true;
         locations.clear();
         locations = locResponse.locations;
-        addresses.clear();
-        for(Locations list in locResponse.locations){
-          addresses.addAll(list.address);
+
+        for (Locations list in locResponse.locations) {
+          if (!addresses.contains(list.address)) addresses.addAll(list.address);
         }
         return true;
       }

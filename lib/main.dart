@@ -19,99 +19,94 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
 
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (context) => LoginModel()),
-      ],
-      child: MaterialApp(
+    return MaterialApp(
 //        initialRoute: token.isEmpty ? null : "/home",
-        onGenerateRoute: (RouteSettings settings) {
-          switch (settings.name) {
-            case '/':
-              return MaterialPageRoute(builder: (_) => WelcomePage());
-              break;
-            case '/login':
-              return PageRouteBuilder(
-                  pageBuilder: (_, __, ___) => InheritedLogin(
-                        child: LoginPage(initialPage: settings.arguments,),
-                      ),
-                  transitionDuration: Duration(milliseconds: 400),
-                  transitionsBuilder:
-                      (context, animation, secondaryAnimation, child) {
-                    var begin = Offset(0.0, 1.0);
-                    var end = Offset.zero;
-                    var tween = Tween(begin: begin, end: end);
-                    var offsetAnimation = animation.drive(tween);
+      onGenerateRoute: (RouteSettings settings) {
+        switch (settings.name) {
+          case '/':
+            return MaterialPageRoute(builder: (_) => WelcomePage());
+            break;
+          case '/login':
+            return PageRouteBuilder(
+                pageBuilder: (_, __, ___) => InheritedLogin(
+                      child: LoginPage(initialPage: settings.arguments,),
+                    ),
+                transitionDuration: Duration(milliseconds: 400),
+                transitionsBuilder:
+                    (context, animation, secondaryAnimation, child) {
+                  var begin = Offset(0.0, 1.0);
+                  var end = Offset.zero;
+                  var tween = Tween(begin: begin, end: end);
+                  var offsetAnimation = animation.drive(tween);
 
-                    return SlideTransition(
-                      position: offsetAnimation,
-                      child: child,
-                    );
-                  });
-            case '/home':
-              return PageRouteBuilder(
-                  pageBuilder: (_, animation, __) {
-                    User user = settings.arguments;
+                  return SlideTransition(
+                    position: offsetAnimation,
+                    child: child,
+                  );
+                });
+          case '/home':
+            return PageRouteBuilder(
+                pageBuilder: (_, animation, __) {
+                  User user = settings.arguments;
 
-                    return HomePage(user);
-                  },
-                  transitionDuration: Duration(milliseconds: 300),
-                  transitionsBuilder:
-                      (context, animation, secondaryAnimation, child) {
-                    var begin = Offset(0.0, 1.0);
-                    var end = Offset.zero;
-                    var tween = Tween(begin: begin, end: end);
+                  return HomePage(user);
+                },
+                transitionDuration: Duration(milliseconds: 300),
+                transitionsBuilder:
+                    (context, animation, secondaryAnimation, child) {
+                  var begin = Offset(0.0, 1.0);
+                  var end = Offset.zero;
+                  var tween = Tween(begin: begin, end: end);
 
-                    var curve = Curves.fastOutSlowIn;
+                  var curve = Curves.fastOutSlowIn;
 
-                    var curvedAnimation = CurvedAnimation(
-                      parent: animation,
-                      curve: curve,
-                    );
+                  var curvedAnimation = CurvedAnimation(
+                    parent: animation,
+                    curve: curve,
+                  );
 
-                    return SlideTransition(
-                      position: tween.animate(curvedAnimation),
-                      child: child,
-                    );
-                  });
-            case '/request':
-              return PageRouteBuilder<bool>(
-                  pageBuilder: (_, animation, __) {
+                  return SlideTransition(
+                    position: tween.animate(curvedAnimation),
+                    child: child,
+                  );
+                });
+          case '/request':
+            return PageRouteBuilder<bool>(
+                pageBuilder: (_, animation, __) {
 
-                    return RequestForm();
-                  },
-                  transitionDuration: Duration(milliseconds: 300),
-                  transitionsBuilder:
-                      (context, animation, secondaryAnimation, child) {
-                    var begin = Offset(0.0, 1.0);
-                    var end = Offset.zero;
-                    var tween = Tween(begin: begin, end: end);
+                  return RequestForm();
+                },
+                transitionDuration: Duration(milliseconds: 300),
+                transitionsBuilder:
+                    (context, animation, secondaryAnimation, child) {
+                  var begin = Offset(0.0, 1.0);
+                  var end = Offset.zero;
+                  var tween = Tween(begin: begin, end: end);
 
-                    var curve = Curves.fastOutSlowIn;
+                  var curve = Curves.fastOutSlowIn;
 
-                    var curvedAnimation = CurvedAnimation(
-                      parent: animation,
-                      curve: curve,
-                    );
+                  var curvedAnimation = CurvedAnimation(
+                    parent: animation,
+                    curve: curve,
+                  );
 
-                    return SlideTransition(
-                      position: tween.animate(curvedAnimation),
-                      child: child,
-                    );
-                  });
-            default:
-              return MaterialPageRoute(
-                  builder: (_) => Scaffold(
-                        body: Center(
-                            child:
-                                Text('No route defined for ${settings.name}')),
-                      ));
-          }
-        },
-        title: 'Flutter Demo',
-        theme: lightTheme(context),
+                  return SlideTransition(
+                    position: tween.animate(curvedAnimation),
+                    child: child,
+                  );
+                });
+          default:
+            return MaterialPageRoute(
+                builder: (_) => Scaffold(
+                      body: Center(
+                          child:
+                              Text('No route defined for ${settings.name}')),
+                    ));
+        }
+      },
+      title: 'Flutter Demo',
+      theme: lightTheme(context),
 //        home: WelcomePage(),
-      ),
     );
   }
 

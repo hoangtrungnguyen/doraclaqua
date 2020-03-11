@@ -102,7 +102,6 @@ class HistoryModel extends MainModel {
 
 class ListRequestModel extends MainModel {
   ListRequestModel() {
-    getAllRequest();
   }
 
   List<HistoryRequest> selecteds = <HistoryRequest>[];
@@ -139,7 +138,7 @@ class ListRequestModel extends MainModel {
     notifyListeners();
   }
 
-  getAllRequest() async {
+  Future<void> getAllRequest() async {
     isLoading = true;
     try {
       String token = await getToken();
@@ -148,6 +147,9 @@ class ListRequestModel extends MainModel {
       if (response.statusCode == 200) {
         ListRequestResponse historyResponse =
             ListRequestResponse.fromJson(json.decode(response.body));
+//        dones..addAll(waitings);
+//        historyResponse.completedList..addAll(historyResponse.waitingList);
+//        if(dones == historyResponse.completedList) return;
         selecteds.clear();
         waitings.clear();
         dones.clear();

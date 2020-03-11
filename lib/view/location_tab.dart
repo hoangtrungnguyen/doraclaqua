@@ -39,13 +39,16 @@ class LocationTab extends StatefulWidget {
   _LocationTabState createState() => _LocationTabState();
 }
 
-class _LocationTabState extends State<LocationTab> {
+class _LocationTabState extends State<LocationTab>
+    with TickerProviderStateMixin {
+  final GlobalKey<AnimatedListState> _listKey = GlobalKey();
   final GlobalKey<_LocationTabState> _locationPageKey = GlobalKey();
+  final addresses = <Address>[];
 
   @override
   void initState() {
     super.initState();
-    Provider.of<LocationModel>(context, listen: false).getLocations();
+    _loadItems();
   }
 
   @override
@@ -55,44 +58,64 @@ class _LocationTabState extends State<LocationTab> {
         builder: (BuildContext context, LocationModel value, Widget child) {
           return Stack(children: <Widget>[
             value.isLoading ? LinearProgressIndicator() : Container(),
-            Column(
-              children: <Widget>[
-                AppBar(
-                  title: Text("Địa điểm đổi rác"),
-                  centerTitle: true,
-                  elevation: 0,
-                  backgroundColor: Colors.green,
-                  actions: [
-                    IconButton(
-                        icon: Icon(Icons.filter_list),
-                        onPressed: () {
-                          showSearch<Address>(
-                              context: context,
-                              delegate: LocationSearch(value.locations));
-                        })
-                  ],
-                ),
-                SizedBox(
-                    height: MediaQuery.of(context).size.height / 7 * 6 * 0.96,
-                    child: ListView.builder(
-                      physics: BouncingScrollPhysics(),
-                      itemCount: value.addresses.length,
-                      itemBuilder: (context, index) {
-                        Address a = value.addresses[index];
-//                        return TweenAnimationBuilder(
-//                          duration: Duration(milliseconds: 400),
-//                          tween: null,
-//                          builder: (BuildContext context, value, Widget child) {
-//                            return ItemSlide(a);
-//                          },
-//                        );
-                        return ItemSlide(a);
-                      },
-                    ))
-              ],
+            SafeArea(
+              child: Column(
+                children: <Widget>[
+                  AppBar(
+                    title: Text("Địa điểm đổi rác"),
+                    centerTitle: true,
+                    elevation: 0,
+                    backgroundColor: Colors.green,
+                    actions: [
+                      IconButton(
+                          icon: Icon(Icons.filter_list),
+                          onPressed: () {
+                            showSearch<Address>(
+                                context: context,
+                                delegate: LocationSearch(value.locations));
+                          })
+                    ],
+                  ),
+                  SizedBox(
+                      height: MediaQuery.of(context).size.height / 7 * 6 * 0.96,
+                      child: AnimatedList(
+                        key: _listKey,
+                        physics: BouncingScrollPhysics(),
+                        initialItemCount: addresses.length,
+                        itemBuilder: (context, index, animation) {
+                          Address add = value.addresses[index];
+                          return FadeTransition(
+                              child: ItemSlide(add),
+                              opacity: CurvedAnimation(
+                                      parent: animation,
+                                      curve: Curves.fastOutSlowIn)
+                                  .drive(Tween<double>(
+                                begin: 0.0,
+                                end: 1.0,
+                              )));
+                        },
+                      ))
+                ],
+              ),
             ),
           ]);
         });
+  }
+
+  _loadItems() async {
+    LocationModel model = Provider.of<LocationModel>(context, listen: false);
+    if(addresses == model.addresses) return;
+    addresses.clear();
+    await model.getLocations();
+    var future = Future(() {});
+    for (var i = 0; i < model.addresses.length; i++) {
+      future = future.then((_) {
+        return Future.delayed(Duration(milliseconds: 25), () {
+          addresses.add(model.addresses[i]);
+          _listKey.currentState.insertItem(addresses.length - 1);
+        });
+      });
+    }
   }
 }
 
@@ -108,68 +131,56 @@ class ItemSlide extends StatefulWidget {
 class _ItemSlideState extends State<ItemSlide> {
   @override
   Widget build(BuildContext context) {
-    return AnimatedOpacity(
-      duration: Duration(milliseconds: 400),
-      opacity: 1.0,
-      child: InkWell(
-        onTap: () {
-          MapsLauncher.launchQuery(
-              "${widget.address.detailAddress} ${widget.address.area}");
-        },
-        child: Card(
-            color: Color.fromRGBO(255, 255, 255, 0.9),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                ListTile(
-                  contentPadding: EdgeInsets.symmetric(horizontal: 16.0),
-                  title: Padding(
-                      padding: EdgeInsets.only(top: 8.0, bottom: 4.0),
-                      child: Text(
-                        widget.address.nameAddress,
-                        style: Theme.of(context).textTheme.headline6,
-                      )),
-                  subtitle: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Padding(
-                        padding: EdgeInsets.zero,
-                        child: Text(
-                          widget.address.detailAddress,
-                          maxLines: 1,
-                          textAlign: TextAlign.start,
-                        ),
-                      ),
-                      Text("${widget.address.time}\n${widget.address.noteTime}")
-                    ],
-                  ),
-                ),
-                ButtonBar(
+    return InkWell(
+      onTap: () {
+        MapsLauncher.launchQuery(
+            "${widget.address.detailAddress} ${widget.address.area}");
+      },
+      child: Card(
+          elevation: 3.0,
+          color: Color.fromRGBO(255, 255, 255, 0.9),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              ListTile(
+                contentPadding: EdgeInsets.symmetric(horizontal: 16.0),
+                title: Padding(
+                    padding: EdgeInsets.only(top: 8.0, bottom: 4.0),
+                    child: Text(
+                      widget.address.nameAddress,
+                      style: Theme.of(context).textTheme.headline6,
+                    )),
+                subtitle: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-//                  RaisedButton(
-//                    shape: RoundedRectangleBorder(
-//                        borderRadius: BorderRadius.all(Radius.circular(10))),
-//                    color: Colors.green[200],
-//                    child: const Text('Đổi quà'),
-//                    onPressed: () async {
-//
-//                    },
-//                  ),
-                    RaisedButton(
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(10))),
-                      color: Colors.green[200],
-                      child: const Text('Gọi'),
-                      onPressed: () async {
-                        InheritedLocationWidget.of(context)
-                            .call(widget.address.phone);
-                      },
-                    )
+                    Padding(
+                      padding: EdgeInsets.zero,
+                      child: Text(
+                        widget.address.detailAddress,
+                        maxLines: 1,
+                        textAlign: TextAlign.start,
+                      ),
+                    ),
+                    Text("${widget.address.time}\n${widget.address.noteTime}")
                   ],
-                )
-              ],
-            )),
-      ),
+                ),
+              ),
+              ButtonBar(
+                children: <Widget>[
+                  RaisedButton(
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(10))),
+                    color: Colors.green[200],
+                    child: const Text('Gọi'),
+                    onPressed: () async {
+                      InheritedLocationWidget.of(context)
+                          .call(widget.address.phone);
+                    },
+                  )
+                ],
+              )
+            ],
+          )),
     );
   }
 }

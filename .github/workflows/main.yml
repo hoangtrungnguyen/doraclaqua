@@ -31,40 +31,12 @@ jobs:
         with:
 #           token: ${{ b92ee200-b66f-488c-acc4-4ba5a6333034 }}
           file: coverage/lcov.info
-  drive_android:
-      #if conditional to prevent a job from running
-      if: github.event_name != 'pull_request'
-      runs-on: macos-latest
-      #creates a build matrix for your jobs
-      strategy:
-        #set of different configurations of the virtual environment.
-        matrix:
-          api-level: [21, 29]
-          target: [default]
-      needs: test
-      steps:
-        - uses: actions/checkout@v1
-        - uses: subosito/flutter-action@v1
-          with:
-            flutter-version: '1.12.14'
-            channel: 'dev'
-        - name: Run Flutter Driver tests
-          #GitHub Action for installing, configuring and running Android Emulators (work only Mac OS)
-          #https://github.com/ReactiveCircus/android-emulator-runner
-          uses: reactivecircus/android-emulator-runner@v1
-          with:
-            api-level: ${{ matrix.api-level }}
-            target: ${{ matrix.target }}
-            arch: x86_64
-            profile: Nexus 6
-            script: flutter drive --target=test_driver/app.dart
 
   build_deploy:
       #if conditional to prevent a job from running
       if: github.event_name != 'pull_request'
       runs-on: macos-latest
       #Identifies any jobs that must complete successfully before this job will run.
-      needs: [drive_android,test]
       name: Build  apk
       steps:
         - uses: actions/checkout@v1
@@ -79,15 +51,15 @@ jobs:
             java-version: '12.x'
         #enable linux,macos,windows   and  web
 #         - run: flutter  config --enable-web
-        - run: flutter  config --enable-linux-desktop
-        - run: flutter  config --enable-macos-desktop
-        - run: flutter  config --enable-windows-desktop
+#         - run: flutter  config --enable-linux-desktop
+#         - run: flutter  config --enable-macos-desktop
+#         - run: flutter  config --enable-windows-desktop
         #- run: flutter build macos --debug
         - run: flutter build apk --debug --split-per-abi
         # This action will create a github release and optionally upload an artifact to it.
         # https://github.com/ncipollo/release-action
         - name: Create a Release APK
-          uses: hoangtrungnguyen/release-action@v1
+          uses: hoangtrungnguyen/master
           with:
             artifacts: "build/app/outputs/apk/debug/*.apk"
 #             token: ${{ secrets.GITHUB_TOKEN }}

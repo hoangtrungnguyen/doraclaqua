@@ -29,5 +29,5 @@ jobs:
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v1
         with:
-          token: ${{ b92ee200-b66f-488c-acc4-4ba5a6333034 }}
+#           token: ${{ b92ee200-b66f-488c-acc4-4ba5a6333034 }}
           file: coverage/lcov.info

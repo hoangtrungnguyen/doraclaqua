@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 class WaveBackground extends StatefulWidget {
   @override
   _WaveBackgroundState createState() => _WaveBackgroundState();
+
 }
 
 class _WaveBackgroundState extends State<WaveBackground> {

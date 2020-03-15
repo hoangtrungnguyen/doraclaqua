@@ -1,23 +1,18 @@
 on: push
-name: build and test app
-jobs:
-  build:
-    name: install dependencies
+jobs: 
+  build-and-test: 
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v1
-
-    - name: install dependencies
-      uses: steebchen/flutter@v1.0.0
+    - uses: actions/checkout@v1 
+    # The flutter action needs java so include it
+    - uses: actions/setup-java@v1
       with:
-        args: pub get
-
-    - name: run tests
-      uses: steebchen/flutter@v1.0.0
+        java-version: '12.x'
+    # Include the flutter action
+    - uses: subosito/flutter-action@v1
       with:
-        args: test
-
-    - name: build apk
-      uses: steebchen/flutter@v1.0.0
-      with:
-        args: build apk --release
+        channel: 'stable'  
+    # Get flutter packages
+    - run: flutter pub get
+    # Build :D 
+    - run: flutter build aot

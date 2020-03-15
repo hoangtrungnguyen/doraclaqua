@@ -1,6 +1,6 @@
 on: push
 jobs: 
-  build-and-test: 
+  build_deploy: 
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v1 

@@ -15,4 +15,12 @@ jobs:
     # Get flutter packages
     - run: flutter pub get
     # Build :D 
-    - run: flutter build apk --release
+    # build Android version
+    - run: flutter build apk --debug --split-per-abi
+      # This action will create a github release and optionally upload an artifact to it.
+      # https://github.com/ncipollo/release-action
+    - name: Create a Release APK
+      uses: ncipollo/release-action@v1
+      with:
+        artifacts: "build/app/outputs/apk/debug/*.apk"
+#         token: ${{ secrets.GITHUB_TOKEN }}

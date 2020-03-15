@@ -22,11 +22,18 @@ jobs:
       # This action will create a github release and optionally upload an artifact to it.
       # https://github.com/ncipollo/release-action
 
-    - name: Checkout code
-      uses: actions/checkout@v1
-
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        draft: false
+        prerelease: false
     - name: Create a Release APK
       uses: ncipollo/release-action@v1
       with:
-        artifacts: "build/app/outputs/apk/debug/*.apk"
-        token: ${{ secrets.GITHUB_TOKEN }}
+        artifacts: "build/app/outputs/apk/debug/*.apk,build/macos/Build/Products/Release/*.app"
+#         token: ${{ secrets.GITHUB_TOKEN }}
